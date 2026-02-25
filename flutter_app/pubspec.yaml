@@ -1,0 +1,37 @@
+name: flutter_app
+description: "A new Flutter project."
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Your packages
+  intl: ^0.20.2
+  provider: ^6.1.1
+  table_calendar: ^3.0.9
+  image_picker: ^1.0.5
+  url_launcher: ^6.2.1
+  cupertino_icons: ^1.0.8
+  http: ^1.1.0
+  shared_preferences: ^2.2.2
+  flutter_local_notifications: ^20.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/cafe/
+    - assets/images/cafe/1.png
+    - assets/images/cafe/2.png
+    - assets/images/cafe/3.png
+    - assets/images/cafe/4.png

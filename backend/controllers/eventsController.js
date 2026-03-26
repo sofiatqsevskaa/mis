@@ -3,7 +3,11 @@ const pool = require('../db');
 exports.getUpcomingEvents = async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT * FROM events WHERE event_date >= NOW() AND visibility='public' ORDER BY event_date ASC`
+      `SELECT * FROM events 
+       WHERE event_date >= NOW() 
+         AND visibility='public' 
+         AND status='approved' 
+       ORDER BY event_date ASC`
     );
     res.json(result.rows);
   } catch (err) {
@@ -16,7 +20,12 @@ exports.getCalendarEvents = async (req, res) => {
   const { month, year } = req.query;
   try {
     const result = await pool.query(
-      `SELECT * FROM events WHERE EXTRACT(MONTH FROM event_date)=$1 AND EXTRACT(YEAR FROM event_date)=$2 ORDER BY event_date ASC`,
+      `SELECT * FROM events
+       WHERE EXTRACT(MONTH FROM event_date)=$1
+         AND EXTRACT(YEAR FROM event_date)=$2
+         AND visibility='public'
+         AND status='approved'
+       ORDER BY event_date ASC`,
       [month, year]
     );
     res.json(result.rows);
@@ -28,7 +37,9 @@ exports.getCalendarEvents = async (req, res) => {
 
 exports.getAdminEvents = async (req, res) => {
   try {
-    const result = await pool.query(`SELECT * FROM events ORDER BY event_date DESC`);
+    const result = await pool.query(
+      `SELECT * FROM events ORDER BY event_date DESC`
+    );
     res.json(result.rows);
   } catch (err) {
     console.error(err);
@@ -38,7 +49,7 @@ exports.getAdminEvents = async (req, res) => {
 
 exports.createEvent = async (req, res) => {
   const { title, description, event_date, start_time, end_time, visibility } = req.body;
-  const created_by = req.user.id; // Assuming JWT middleware adds user to req
+  const created_by = req.user.id;
 
   try {
     const result = await pool.query(
@@ -56,7 +67,7 @@ exports.createEvent = async (req, res) => {
 exports.updateEventStatus = async (req, res) => {
   const { eventId } = req.params;
   const { status } = req.body;
-  const approved_by = req.user.id; // Assuming JWT middleware
+  const approved_by = req.user.id;
 
   try {
     await pool.query(

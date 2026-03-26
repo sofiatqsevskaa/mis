@@ -35,3 +35,13 @@ flutter:
     - assets/images/cafe/2.png
     - assets/images/cafe/3.png
     - assets/images/cafe/4.png
+    - assets/images/laboratorium.jpg
+    - assets/images/logo_lab.png
+    - assets/images/past_events/event1.jpg
+    - assets/images/past_events/event2.jpg
+    - assets/images/past_events/event3.jpg
+
+  fonts:
+    - family: AkzidenzGrotesk
+      fonts:
+        - asset: assets/fonts/Akzidenz-grotesk-font.ttf

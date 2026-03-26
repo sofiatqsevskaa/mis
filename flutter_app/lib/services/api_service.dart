@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/models.dart';
+import '../models/cafe_event.dart';
+import '../models/cafe_user.dart';
+import '../models/whitelist_entry.dart';
+import '../models/event_note.dart';
 import 'auth_service.dart';
 
 class ApiService {
@@ -83,7 +86,8 @@ class ApiService {
       body: jsonEncode({
         'title': title,
         'description': description,
-        'event_date': date.toIso8601String(),
+        'event_date':
+            '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}',
         'start_time': startTime,
         'end_time': endTime,
         'visibility': visibility,

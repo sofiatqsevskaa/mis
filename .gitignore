@@ -145,3 +145,5 @@ cafe_images/uploads/
 *.key
 *.crt
 *.csr
+
+sliki/

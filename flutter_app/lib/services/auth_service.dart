@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/models.dart';
+import '../models/cafe_user.dart';
 
 class AuthService {
   static const String baseUrl = 'http://localhost:3000';

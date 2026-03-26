@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../models/models.dart';
+import '../models/whitelist_entry.dart';
+import '../models/cafe_event.dart';
+import '../models/cafe_user.dart';
+import '../models/event_note.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 
 class AdminScreen extends StatefulWidget {
-  const AdminScreen({super.key});
+  final VoidCallback? onEventStatusChanged;
+  const AdminScreen({super.key, this.onEventStatusChanged});
 
   @override
   State<AdminScreen> createState() => _AdminScreenState();
@@ -32,11 +36,11 @@ class _AdminScreenState extends State<AdminScreen>
     return Column(
       children: [
         Container(
-          color: AppTheme.darkBrown,
+          color: AppTheme.burgundy,
           child: TabBar(
             controller: _tabCtrl,
             labelColor: AppTheme.accent,
-            unselectedLabelColor: AppTheme.lightBrown,
+            unselectedLabelColor: AppTheme.gray,
             indicatorColor: AppTheme.accent,
             tabs: const [
               Tab(text: 'Events & Notes'),
@@ -47,7 +51,12 @@ class _AdminScreenState extends State<AdminScreen>
         Expanded(
           child: TabBarView(
             controller: _tabCtrl,
-            children: const [_EventsNotesTab(), _UsersTab()],
+            children: [
+              _EventsNotesTab(
+                onEventStatusChanged: widget.onEventStatusChanged,
+              ),
+              const _UsersTab(),
+            ],
           ),
         ),
       ],
@@ -56,7 +65,8 @@ class _AdminScreenState extends State<AdminScreen>
 }
 
 class _EventsNotesTab extends StatefulWidget {
-  const _EventsNotesTab();
+  final VoidCallback? onEventStatusChanged;
+  const _EventsNotesTab({this.onEventStatusChanged});
 
   @override
   State<_EventsNotesTab> createState() => _EventsNotesTabState();
@@ -111,19 +121,49 @@ class _EventsNotesTabState extends State<_EventsNotesTab> {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
-            ...pending.map((e) => _AdminEventCard(event: e, onAction: _load)),
+            ...pending.map(
+              (e) => _AdminEventCard(
+                event: e,
+                onAction: () {
+                  _load();
+                  if (widget.onEventStatusChanged != null) {
+                    widget.onEventStatusChanged!();
+                  }
+                },
+              ),
+            ),
             const SizedBox(height: 16),
           ],
           if (approved.isNotEmpty) ...[
             Text('Approved', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
-            ...approved.map((e) => _AdminEventCard(event: e, onAction: _load)),
+            ...approved.map(
+              (e) => _AdminEventCard(
+                event: e,
+                onAction: () {
+                  _load();
+                  if (widget.onEventStatusChanged != null) {
+                    widget.onEventStatusChanged!();
+                  }
+                },
+              ),
+            ),
             const SizedBox(height: 16),
           ],
           if (rejected.isNotEmpty) ...[
             Text('Rejected', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
-            ...rejected.map((e) => _AdminEventCard(event: e, onAction: _load)),
+            ...rejected.map(
+              (e) => _AdminEventCard(
+                event: e,
+                onAction: () {
+                  _load();
+                  if (widget.onEventStatusChanged != null) {
+                    widget.onEventStatusChanged!();
+                  }
+                },
+              ),
+            ),
           ],
         ],
       ),

@@ -85,7 +85,7 @@ class _LoginScreenState extends State<LoginScreen>
             content: Text(
               'Account created! An admin will review your access request.',
             ),
-            backgroundColor: AppTheme.darkBrown,
+            backgroundColor: AppTheme.burgundy,
           ),
         );
       }
@@ -112,11 +112,11 @@ class _LoginScreenState extends State<LoginScreen>
       body: Column(
         children: [
           Container(
-            color: AppTheme.darkBrown,
+            color: AppTheme.burgundy,
             child: TabBar(
               controller: _tabCtrl,
               labelColor: AppTheme.accent,
-              unselectedLabelColor: AppTheme.lightBrown,
+              unselectedLabelColor: AppTheme.gray,
               indicatorColor: AppTheme.accent,
               tabs: const [
                 Tab(text: 'Sign In'),
@@ -169,7 +169,7 @@ class _LoginScreenState extends State<LoginScreen>
                 suffixIcon: IconButton(
                   icon: Icon(
                     _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                    color: AppTheme.lightBrown,
+                    color: AppTheme.gray,
                   ),
                   onPressed: () =>
                       setState(() => _obscurePassword = !_obscurePassword),
@@ -191,7 +191,7 @@ class _LoginScreenState extends State<LoginScreen>
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
-                          color: AppTheme.cream,
+                          color: AppTheme.offWhite,
                           strokeWidth: 2,
                         ),
                       )
@@ -204,7 +204,7 @@ class _LoginScreenState extends State<LoginScreen>
                 onPressed: () => _tabCtrl.animateTo(1),
                 child: const Text(
                   "Don't have an account? Register",
-                  style: TextStyle(color: AppTheme.darkBrown),
+                  style: TextStyle(color: AppTheme.burgundy),
                 ),
               ),
             ),
@@ -247,7 +247,7 @@ class _LoginScreenState extends State<LoginScreen>
                   Expanded(
                     child: Text(
                       "Accounts must be approved by an admin before you can book events. If your email is pre-approved, you'll get instant access.",
-                      style: TextStyle(fontSize: 13, color: AppTheme.warmBrown),
+                      style: TextStyle(fontSize: 13, color: AppTheme.charcoal),
                     ),
                   ),
                 ],
@@ -275,7 +275,7 @@ class _LoginScreenState extends State<LoginScreen>
                 suffixIcon: IconButton(
                   icon: Icon(
                     _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                    color: AppTheme.lightBrown,
+                    color: AppTheme.gray,
                   ),
                   onPressed: () =>
                       setState(() => _obscurePassword = !_obscurePassword),
@@ -299,7 +299,7 @@ class _LoginScreenState extends State<LoginScreen>
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
-                          color: AppTheme.cream,
+                          color: AppTheme.offWhite,
                           strokeWidth: 2,
                         ),
                       )

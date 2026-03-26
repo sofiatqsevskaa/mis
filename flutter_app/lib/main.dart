@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 import 'theme/app_theme.dart';
 import 'services/auth_provider.dart';
 import 'screens/home_screen.dart';
-import 'screens/event_screen.dart';
-import 'screens/calendar_screen.dart';
+import 'screens/events/event_screen.dart';
+import 'screens/booking/book_event_screen.dart';
 import 'screens/admin_screen.dart';
 import 'screens/login_screen.dart';
 
@@ -39,15 +39,26 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> with TickerProviderStateMixin {
   late TabController _tabController;
+  int _currentIndex = 0;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(_handleTabSelection);
+  }
+
+  void _handleTabSelection() {
+    if (_tabController.indexIsChanging) {
+      setState(() {
+        _currentIndex = _tabController.index;
+      });
+    }
   }
 
   @override
   void dispose() {
+    _tabController.removeListener(_handleTabSelection);
     _tabController.dispose();
     super.dispose();
   }
@@ -62,13 +73,13 @@ class _MainShellState extends State<MainShell> with TickerProviderStateMixin {
       _NavItem(
         icon: Icons.event_outlined,
         label: 'Events',
-        screen: const EventsScreen(),
+        screen: const EventScreen(),
       ),
       if (auth.isApproved)
         _NavItem(
           icon: Icons.calendar_month_outlined,
           label: 'Book',
-          screen: const CalendarScreen(),
+          screen: const BookEventScreen(),
         ),
       if (auth.isAdmin)
         _NavItem(
@@ -88,6 +99,10 @@ class _MainShellState extends State<MainShell> with TickerProviderStateMixin {
       vsync: this,
       initialIndex: clampedIndex,
     );
+    _tabController.addListener(_handleTabSelection);
+    setState(() {
+      _currentIndex = clampedIndex;
+    });
   }
 
   @override
@@ -99,35 +114,79 @@ class _MainShellState extends State<MainShell> with TickerProviderStateMixin {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('LABORATORIUM'),
-        // ─── Navigation tabs sit inside the AppBar ────────────────────────
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: AppTheme.accent,
-          unselectedLabelColor: AppTheme.lightBrown,
-          indicatorColor: AppTheme.accent,
-          indicatorWeight: 3,
-          tabs: navItems
-              .map(
-                (item) => Tab(
-                  icon: Icon(item.icon, size: 20),
-                  text: item.label,
-                  iconMargin: const EdgeInsets.only(bottom: 2),
+        toolbarHeight: 80,
+        title: Row(
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                image: const DecorationImage(
+                  image: AssetImage('assets/images/logo_lab.png'),
+                  fit: BoxFit.cover,
                 ),
-              )
-              .toList(),
+              ),
+            ),
+            const Spacer(),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  for (int i = 0; i < navItems.length; i++) ...[
+                    InkWell(
+                      onTap: () {
+                        _tabController.animateTo(i);
+                      },
+                      borderRadius: BorderRadius.circular(8),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              navItems[i].icon,
+                              size: 20,
+                              color: i == _currentIndex
+                                  ? AppTheme.accent
+                                  : AppTheme.gray,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              navItems[i].label,
+                              style: TextStyle(
+                                color: i == _currentIndex
+                                    ? AppTheme.accent
+                                    : AppTheme.gray,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
         ),
+        centerTitle: false,
+        titleSpacing: 16,
         actions: [
           if (auth.isLoggedIn) ...[
             Center(
               child: Container(
-                margin: const EdgeInsets.only(right: 4),
+                margin: const EdgeInsets.only(right: 8),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 10,
-                  vertical: 4,
+                  vertical: 5,
                 ),
                 decoration: BoxDecoration(
-                  color: AppTheme.accent.withOpacity(0.2),
+                  color: AppTheme.accent.withAlpha(25),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -135,15 +194,15 @@ class _MainShellState extends State<MainShell> with TickerProviderStateMixin {
                   children: [
                     Icon(
                       auth.isAdmin ? Icons.admin_panel_settings : Icons.person,
-                      size: 14,
+                      size: 16,
                       color: AppTheme.accent,
                     ),
-                    const SizedBox(width: 5),
+                    const SizedBox(width: 6),
                     Text(
                       auth.user?.name.split(' ').first ?? '',
                       style: const TextStyle(
                         color: AppTheme.accent,
-                        fontSize: 13,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -152,26 +211,41 @@ class _MainShellState extends State<MainShell> with TickerProviderStateMixin {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.logout_outlined),
-              tooltip: 'Sign out',
+              icon: const Icon(Icons.logout_outlined, size: 22),
               onPressed: auth.logout,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
             ),
           ] else
-            TextButton.icon(
-              icon: const Icon(
-                Icons.person_outline,
-                color: AppTheme.cream,
-                size: 20,
-              ),
-              label: const Text(
-                'Sign In',
-                style: TextStyle(color: AppTheme.cream),
-              ),
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const LoginScreen()),
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: TextButton.icon(
+                icon: const Icon(
+                  Icons.person_outline,
+                  color: AppTheme.offWhite,
+                  size: 18,
+                ),
+                label: const Text(
+                  'Sign In',
+                  style: TextStyle(
+                    color: AppTheme.offWhite,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                ),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                ),
               ),
             ),
+          const SizedBox(width: 16),
         ],
       ),
       body: TabBarView(

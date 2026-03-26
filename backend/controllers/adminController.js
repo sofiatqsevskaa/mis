@@ -36,12 +36,13 @@ exports.getWhitelist = async (req, res) => {
 exports.addToWhitelist = async (req, res) => {
   const { email } = req.body;
   const added_by = req.user.id;
-
+  console.log("adding user to whitelist")
   try {
     const result = await pool.query(
       `INSERT INTO whitelisted_emails (email, added_by) VALUES ($1,$2) RETURNING *`,
       [email, added_by]
     );
+    await pool.query(`UPDATE users SET role='approved' WHERE email = $1`, [email])
     res.json(result.rows[0]);
   } catch (err) {
     console.error(err);

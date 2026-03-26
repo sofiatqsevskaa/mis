@@ -1,4 +1,5 @@
-import '../models/models.dart';
+import '../models/cafe_event.dart';
+import '../models/event_note.dart';
 import 'api_service.dart';
 
 class EventService {

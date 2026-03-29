@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -20,10 +21,37 @@ class _ContactMapWidgetState extends State<ContactMapWidget> {
 
   LatLng? _userLocation;
   bool _loadingLocation = false;
+  bool _askedPermission = false;
   String? _locationError;
   String? _distanceText;
 
   Future<void> _fetchUserLocation() async {
+    if (!_askedPermission) {
+      final agreed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Share your location?'),
+          content: const Text(
+            'We\'ll show how far you are from the café and '
+            'use your location for directions.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Not now'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Allow'),
+            ),
+          ],
+        ),
+      );
+
+      setState(() => _askedPermission = true);
+      if (agreed != true) return;
+    }
+
     setState(() {
       _loadingLocation = true;
       _locationError = null;
@@ -49,7 +77,11 @@ class _ContactMapWidgetState extends State<ContactMapWidget> {
         userLatLng,
       ]);
       _mapController.fitCamera(
-        CameraFit.bounds(bounds: bounds, padding: const EdgeInsets.all(60)),
+        CameraFit.bounds(
+          bounds: bounds,
+          padding: const EdgeInsets.all(60),
+          maxZoom: 17,
+        ),
       );
     } catch (e) {
       setState(() => _locationError = e.toString());
@@ -60,10 +92,23 @@ class _ContactMapWidgetState extends State<ContactMapWidget> {
 
   Future<void> _openDirections() async {
     final cafe = LocationMapService.cafeLocation;
-    final uri = Uri.parse(
-      'https://www.google.com/maps/dir/?api=1'
-      '&destination=${cafe.latitude},${cafe.longitude}',
-    );
+
+    Uri uri;
+    if (_userLocation != null) {
+      uri = Uri.parse(
+        'https://www.google.com/maps/dir/?api=1'
+        '&origin=${_userLocation!.latitude},${_userLocation!.longitude}'
+        '&destination=${cafe.latitude},${cafe.longitude}'
+        '&travelmode=driving',
+      );
+    } else {
+      uri = Uri.parse(
+        'https://www.google.com/maps/dir/?api=1'
+        '&destination=${cafe.latitude},${cafe.longitude}'
+        '&travelmode=driving',
+      );
+    }
+
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
@@ -82,7 +127,7 @@ class _ContactMapWidgetState extends State<ContactMapWidget> {
       mapController: _mapController,
       options: MapOptions(
         initialCenter: LocationMapService.cafeLocation,
-        initialZoom: 15,
+        initialZoom: 17,
         interactionOptions: const InteractionOptions(
           flags: InteractiveFlag.all,
         ),
@@ -91,6 +136,7 @@ class _ContactMapWidgetState extends State<ContactMapWidget> {
         TileLayer(
           urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
           userAgentPackageName: 'com.flutter_app',
+          tileProvider: CancellableNetworkTileProvider(),
         ),
 
         if (_userLocation != null)
@@ -113,7 +159,6 @@ class _ContactMapWidgetState extends State<ContactMapWidget> {
               height: 56,
               child: _CafePin(),
             ),
-
             if (_userLocation != null)
               Marker(
                 point: _userLocation!,
@@ -156,12 +201,10 @@ class _ContactMapWidgetState extends State<ContactMapWidget> {
             onTap: _loadingLocation ? null : _fetchUserLocation,
             tooltip: 'Show my location',
           ),
-
           if (_locationError != null) ...[
             const SizedBox(height: 8),
             _ErrorBubble(message: _locationError!),
           ],
-
           if (_distanceText != null) ...[
             const SizedBox(height: 8),
             _InfoBubble(text: _distanceText!),
@@ -177,9 +220,11 @@ class _ContactMapWidgetState extends State<ContactMapWidget> {
       left: 10,
       child: _MapButton(
         icon: const Icon(Icons.directions, color: AppTheme.white, size: 20),
-        label: 'Get Directions',
+        label: _userLocation != null ? 'Get Directions' : 'Open in Maps',
         onTap: _openDirections,
-        tooltip: 'Open in Maps',
+        tooltip: _userLocation != null
+            ? 'Navigate from your location'
+            : 'Open cafe in Maps',
       ),
     );
   }

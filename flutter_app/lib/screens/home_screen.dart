@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../services/api_service.dart';
+import '../widgets/contact_map_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -413,24 +414,37 @@ class _ContactSection extends StatelessWidget {
     return Container(
       color: AppTheme.charcoal,
       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            'CONTACT',
-            style: Theme.of(
-              context,
-            ).textTheme.headlineMedium?.copyWith(color: AppTheme.white),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'CONTACT',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.headlineMedium?.copyWith(color: AppTheme.white),
+                ),
+                const SizedBox(height: 32),
+                _ContactRow(Icons.phone_outlined, info['phone'] ?? ''),
+                const SizedBox(height: 16),
+                _ContactRow(Icons.email_outlined, info['email'] ?? ''),
+                const SizedBox(height: 16),
+                _ContactRow(Icons.location_on_outlined, info['address'] ?? ''),
+                const SizedBox(height: 16),
+                _ContactRow(Icons.access_time_outlined, info['hours'] ?? ''),
+              ],
+            ),
           ),
-          const SizedBox(height: 32),
-          _ContactRow(Icons.phone_outlined, info['phone'] ?? ''),
-          const SizedBox(height: 16),
-          _ContactRow(Icons.email_outlined, info['email'] ?? ''),
-          const SizedBox(height: 16),
-          _ContactRow(Icons.location_on_outlined, info['address'] ?? ''),
-          const SizedBox(height: 16),
-          _ContactRow(Icons.access_time_outlined, info['hours'] ?? ''),
+
+          const SizedBox(width: 24),
+
+          const Expanded(
+            child: SizedBox(height: 300, child: ContactMapWidget()),
+          ),
         ],
       ),
     );
